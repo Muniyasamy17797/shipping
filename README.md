@@ -49,8 +49,10 @@ npm start
 /* To run the tests */
 npm run test
 
-/* To initialise playwright */
-npm init playwright@latest
+/* all playwright dependencies are already added*/
+/* To run the playwright tests */
+npx playwright test
+
 
 ```
 
