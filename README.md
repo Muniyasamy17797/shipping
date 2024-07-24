@@ -36,6 +36,7 @@ Try playing with the code on CodeSandbox :)
 
 - Node.js
 - NPM
+- Playwright
 
 ```javascript
 
@@ -47,6 +48,11 @@ npm start
 
 /* To run the tests */
 npm run test
+
+/* all playwright dependencies are already added*/
+/* To run the playwright tests */
+npx playwright test
+
 
 ```
 
