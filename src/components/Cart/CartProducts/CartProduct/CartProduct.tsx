@@ -12,6 +12,7 @@ const CartProduct = ({ product }: IProps) => {
   const { removeProduct, increaseProductQuantity, decreaseProductQuantity } =
     useCart();
   const {
+    id,
     sku,
     title,
     price,
@@ -22,9 +23,9 @@ const CartProduct = ({ product }: IProps) => {
     quantity,
   } = product;
 
-  const handleRemoveProduct = () => removeProduct(product);
-  const handleIncreaseProductQuantity = () => increaseProductQuantity(product);
-  const handleDecreaseProductQuantity = () => decreaseProductQuantity(product);
+  const handleRemoveProduct = () => removeProduct(id);
+  const handleIncreaseProductQuantity = () => increaseProductQuantity(id);
+  const handleDecreaseProductQuantity = () => decreaseProductQuantity(id);
 
   return (
     <S.Container>

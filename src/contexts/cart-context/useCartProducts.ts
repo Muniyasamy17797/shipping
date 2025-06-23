@@ -6,65 +6,38 @@ const useCartProducts = () => {
   const { products, setProducts } = useCartContext();
   const { updateCartTotal } = useCartTotal();
 
-  const updateQuantitySafely = (
-    currentProduct: ICartProduct,
-    targetProduct: ICartProduct,
-    quantity: number
-  ): ICartProduct => {
-    if (currentProduct.id === targetProduct.id) {
-      return Object.assign({
-        ...currentProduct,
-        quantity: currentProduct.quantity + quantity,
-      });
-    } else {
-      return currentProduct;
-    }
-  };
+
 
   const addProduct = (newProduct: ICartProduct) => {
-    let updatedProducts;
-    const isProductAlreadyInCart = products.some(
-      (product: ICartProduct) => newProduct.id === product.id
+    const existingIndex = products.findIndex(p => p.id === newProduct.id);
+    const result = existingIndex >= 0
+      ? products.map(product => 
+          product.id === newProduct.id
+            ? { ...product, quantity: product.quantity + newProduct.quantity }
+            : product
+        )
+      : [...products, newProduct];
+    
+    setProducts(result);
+    updateCartTotal(result);
+  };
+
+  const updateQuantity = (id: number, change: number) => {
+    const result = products.map(product =>
+      product.id === id ? { ...product, quantity: product.quantity + change } : product
     );
-
-    if (isProductAlreadyInCart) {
-      updatedProducts = products.map((product: ICartProduct) => {
-        return updateQuantitySafely(product, newProduct, newProduct.quantity);
-      });
-    } else {
-      updatedProducts = [...products, newProduct];
-    }
-
-    setProducts(updatedProducts);
-    updateCartTotal(updatedProducts);
+    setProducts(result);
+    updateCartTotal(result);
   };
 
-  const removeProduct = (productToRemove: ICartProduct) => {
-    const updatedProducts = products.filter(
-      (product: ICartProduct) => product.id !== productToRemove.id
-    );
-
-    setProducts(updatedProducts);
-    updateCartTotal(updatedProducts);
+  const removeProduct = (id: number) => {
+    const result = products.filter(product => product.id !== id);
+    setProducts(result);
+    updateCartTotal(result);
   };
 
-  const increaseProductQuantity = (productToIncrease: ICartProduct) => {
-    const updatedProducts = products.map((product: ICartProduct) => {
-      return updateQuantitySafely(product, productToIncrease, +1);
-    });
-
-    setProducts(updatedProducts);
-    updateCartTotal(updatedProducts);
-  };
-
-  const decreaseProductQuantity = (productToDecrease: ICartProduct) => {
-    const updatedProducts = products.map((product: ICartProduct) => {
-      return updateQuantitySafely(product, productToDecrease, -1);
-    });
-
-    setProducts(updatedProducts);
-    updateCartTotal(updatedProducts);
-  };
+  const increaseProductQuantity = (id: number) => updateQuantity(id, 1);
+  const decreaseProductQuantity = (id: number) => updateQuantity(id, -1);
 
   return {
     products,
