@@ -54,11 +54,22 @@ export const getProducts = async () => {
         response = require('static/json/products.json');
       }
 
-      if (!response.data?.products) {
+      if (!response.data?.products || !Array.isArray(response.data.products)) {
         throw createError('Invalid response format', 'INVALID_RESPONSE');
       }
 
-      return response.data.products;
+      // Validate and sanitize product data
+      const validatedProducts = response.data.products.filter((product: any) => {
+        return product && 
+               typeof product.id === 'number' &&
+               typeof product.sku === 'number' &&
+               typeof product.title === 'string' &&
+               typeof product.price === 'number' &&
+               product.price >= 0 &&
+               Array.isArray(product.availableSizes);
+      });
+
+      return validatedProducts;
     };
 
     return await retry(fetchProducts);

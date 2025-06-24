@@ -4,6 +4,8 @@ const GithubCorner = () => (
   <S.Container
     href="https://github.com/jeffersonRibeiro/react-shopping-cart"
     aria-label="View source on Github"
+    target="_blank"
+    rel="noopener noreferrer"
   >
     <svg
       width="80"
