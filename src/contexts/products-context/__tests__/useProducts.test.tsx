@@ -1,10 +1,17 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { ICartProduct } from 'models';
 import React, { ReactNode } from 'react';
 import { ProductsProvider } from '..';
 import useProducts from '../useProducts';
 
 import { mockProducts } from 'utils/test/mocks';
+
+// Mock the products service
+jest.mock('services/products', () => ({
+  getProducts: jest.fn(),
+}));
+
+const mockGetProducts = require('services/products').getProducts;
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <ProductsProvider>{children}</ProductsProvider>
@@ -80,6 +87,52 @@ describe('[contexts] - products-context', () => {
             title: 'Black Tule Oversized',
           },
         ]);
+      });
+
+      test('handles network errors with retry capability', async () => {
+        const networkError = { message: 'Network connection failed', code: 'NETWORK_ERROR', retryable: true };
+        mockGetProducts.mockRejectedValueOnce(networkError);
+
+        const { result } = renderHook(() => useProducts(), { wrapper });
+
+        await act(async () => {
+          try {
+            await result.current.fetchProducts();
+          } catch (error) {
+            // Expected to throw
+          }
+        });
+
+        expect(result.current.error).toEqual(networkError);
+        expect(result.current.canRetry).toBe(true);
+      });
+
+      test('clears error on successful retry', async () => {
+        const networkError = { message: 'Network connection failed', code: 'NETWORK_ERROR', retryable: true };
+        
+        mockGetProducts
+          .mockRejectedValueOnce(networkError)
+          .mockResolvedValueOnce(mockProducts);
+
+        const { result } = renderHook(() => useProducts(), { wrapper });
+
+        // First call fails
+        await act(async () => {
+          try {
+            await result.current.fetchProducts();
+          } catch (error) {
+            // Expected to throw
+          }
+        });
+
+        expect(result.current.error).toEqual(networkError);
+
+        // Retry succeeds
+        await act(async () => {
+          await result.current.retryFetch();
+        });
+
+        expect(result.current.error).toBeNull();
       });
     });
   });
